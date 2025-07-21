@@ -1,0 +1,119 @@
+SignEdit is a robust, client-side web application crafted to empower users in creating, customizing, previewing, and managing professional email signatures. It's built with the core web technologies of plain HTML, styled with the utility-first Tailwind CSS, and powered by JavaScript for all its interactive functionalities. This ensures the application remains lightweight, efficient, and runs entirely within the user's browser without requiring server-side processing or an internet connection after initial load.
+
+Application Structure and Design
+
+SignEdit features a modern glassmorphic design, giving it a sleek, translucent aesthetic that beautifully integrates with the background. The intuitive layout is divided into a dedicated navigation bar, a clear footer, and two primary interactive columns:
+
+Navigation Bar: The header is designed as a navigation bar using a flexbox layout with space-between alignment. It prominently displays the application name, "SignEdit," on the left and a credit line "Built with devsimsek ❤️ using Gemini" on the right. This ensures a clean, professional look while maintaining usability and acknowledging the collaborative open-source effort.
+
+Left Column (Input Fields): This is your control center, where you configure every aspect of your email signature. All customization options are logically grouped for ease of use.
+
+Right Column (Preview & Templates): This dynamic section provides an instant, real-time preview of your signature as you make changes. It also houses powerful tools for managing your signature templates.
+
+Core Features
+
+SignEdit is packed with features designed to give you granular control over your signature:
+
+Signature Details:
+
+Full Name: Input the primary name to appear in your signature.
+
+Title: Define your professional title or role.
+
+Text Order (Name/Title): Choose the display order of your full name and title (e.g., "Name then Title" or "Title then Name").
+
+Full Name Color & Size: Customize the color and font size specifically for your full name.
+
+Title Color & Size: Set the color and font size for your professional title.
+
+Full Name & Title Bold Option: Toggle bold styling for both your full name and title independently.
+
+Spacing After Name/Title (px): Control the vertical space after the name/title block.
+
+Logo Image URL (Optional): Provide a URL to embed an image (company logo, personal photo). The application includes an onerror fallback to a generic placeholder image if the URL is invalid or fails to load.
+
+Dynamic Link Management:
+
+Email Addresses: Add multiple email addresses, with each input featuring an "X" button for easy removal.
+
+Website URLs: Dynamically add and remove multiple website links.
+
+Social Media Links: Add various social media profiles. Each social link has fields for the platform name (e.g., "LinkedIn", "Twitter") and the profile URL. If more than one social link is present, they will be separated by a customizable | symbol.
+
+Link Styling:
+
+Email Link Color & Size: Control the color and font size of all email addresses.
+
+Website Link Color & Size: Control the color and font size of all website URLs.
+
+Social Link Color & Size: Control the color and font size of all social media links.
+
+Spacing After Website Links (px): Define the vertical space after the entire block of website links.
+
+Spacing After Social Links (px): Define the vertical space after the entire block of social media links.
+
+Separator Color: Customize the color of the | separator used between social media links.
+
+Font Styling:
+
+Font Family: Choose from a curated selection of common web-safe fonts to apply consistently across your entire signature.
+
+Border Configuration:
+
+The signature features a highly customizable border using a robust table-based rendering method for maximum email client compatibility. Users can control:
+
+Border Style: Select from "Left Side Only," "Right Side Only," "All Sides," "No Border," or "Custom Border."
+
+Custom Border Sides: When "Custom Border" is selected, individually choose to apply the border to the left, right, top, or bottom sides.
+
+Border Color: Use a color picker to set the border's color.
+
+Border Width (px): Adjust the thickness of the border in pixels.
+
+Padding (px): Control the internal spacing between the border and your signature content.
+
+Margin (px): Set the external spacing around the entire signature block.
+
+Real-time Preview:
+
+The "Signature Preview" section on the right instantly displays how your email signature will appear, updating as you make any changes in the input fields. This ensures immediate visual feedback.
+
+Copy Functionality:
+
+To cater to different email client requirements, SignEdit offers two distinct copy options:
+
+Copy Signature (Rich Text): This button copies the visually rendered, formatted content of the signature to the clipboard. This method is generally preferred by modern email clients for preserving complex styling and links accurately.
+
+Copy Raw HTML: This button copies the complete HTML source code of the generated signature to the clipboard. This is useful for email clients or systems that require direct HTML input.
+
+Template Management:
+
+Enhance your workflow efficiency by saving and loading different signature configurations:
+
+Save Current: Name and save your current signature configuration as a new template.
+
+Load Template: A dropdown menu lists all available templates (including pre-defined and user-saved options). Selecting an option instantly loads its data into the input fields and updates the preview.
+
+Delete Selected Template: Delete your custom-saved templates. Pre-defined templates are protected from deletion.
+
+Template Import/Export:
+
+For seamless sharing or backing up of your templates, the application supports JSON-based import and export:
+
+Download All Templates (JSON): Download a .json file containing all currently available templates (both pre-defined and user-saved).
+
+Upload Templates (JSON): Upload a .json file containing templates. The application parses the file and adds/updates these templates in your local storage, allowing for easy migration or sharing of designs.
+
+Data Persistence (Local Storage)
+
+All user-saved templates are stored directly in your browser using Local Storage. This provides several key benefits:
+
+No Internet Connection Required: Once loaded, the application functions entirely offline, ensuring uninterrupted workflow.
+
+Client-Side Only: No data is sent to or stored on any external server, ensuring your signature data remains private and secure on your device.
+
+Browser-Specific: Saved templates are tied to the specific browser and device used. Clearing browser data (cookies, site data) will remove your saved templates.
+
+Conclusion
+
+SignEdit offers a comprehensive, user-friendly, and self-contained solution for creating and managing professional email signatures. Its dynamic input fields, real-time preview, flexible border and link styling, customizable text layout, and robust template management (with JSON import/export) make it a powerful and versatile tool for individuals and teams looking to standardize and elevate their email communications.

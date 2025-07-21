@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignEdit - Email Signature Editor</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            color: #e0e0e0; /* Light text for dark background */
+        }
+        .glass-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            padding: 2rem;
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .input-group label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+            color: #c0c0c0;
+        }
+        .input-group input[type="text"],
+        .input-group input[type="url"],
+        .input-group input[type="number"],
+        .input-group input[type="color"],
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #f0f0f0;
+            outline: none;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .input-group input[type="text"]:focus,
+        .input-group input[type="url"]:focus,
+        .input-group input[type="number"]:focus,
+        .input-group input[type="color"]:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            border-color: #a78bfa; /* Purple-500 */
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .input-group input[type="color"] {
+            padding: 0.25rem;
+            height: 40px; /* Adjust height for color picker */
+        }
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background-color: #8b5cf6; /* Violet-500 */
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #7c3aed; /* Violet-600 */
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #f0f0f0;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background-color: #ef4444; /* Red-500 */
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626; /* Red-600 */
+            transform: translateY(-1px);
+        }
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #f0f0f0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 0.75rem;
+        }
+        iframe {
+            width: 100%;
+            min-height: 125px; /* Adjusted height */
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .flex-wrap-gap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: transform 0.1s;
+        }
+        .remove-btn:hover {
+            transform: scale(1.1);
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-container">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-6">
+            <h1 class="text-4xl font-bold text-white">SignEdit</h1>
+            <p class="text-lg text-gray-300">Built with devsimsek ❤️ using Gemini</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Column: Input Fields -->
+            <div class="bg-white bg-opacity-10 p-6 rounded-xl shadow-lg">
+                <h2 class="section-header">Signature Details</h2>
+
+                <!-- Full Name -->
+                <div class="mb-4 input-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" placeholder="John Doe" class="rounded-lg">
+                </div>
+
+                <!-- Title -->
+                <div class="mb-4 input-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" placeholder="Software Engineer" class="rounded-lg">
+                </div>
+
+                <!-- Text Order (Name/Title) -->
+                <div class="mb-4 input-group">
+                    <label for="textOrder">Text Order</label>
+                    <select id="textOrder" class="rounded-lg">
+                        <option value="name-title">Name then Title</option>
+                        <option value="title-name">Title then Name</option>
+                    </select>
+                </div>
+
+                <!-- Name and Title Colors -->
+                <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label for="fullNameColor">Full Name Color</label>
+                        <input type="color" id="fullNameColor" value="#333333" class="rounded-lg">
+                    </div>
+                    <div class="input-group">
+                        <label for="titleColor">Title Color</label>
+                        <input type="color" id="titleColor" value="#555555" class="rounded-lg">
+                    </div>
+                </div>
+
+                <!-- Name and Title Bold -->
+                <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group flex items-center">
+                        <input type="checkbox" id="isFullNameBold" class="form-checkbox text-violet-500 rounded">
+                        <label for="isFullNameBold" class="ml-2 mb-0">Make Full Name Bold</label>
+                    </div>
+                    <div class="input-group flex items-center">
+                        <input type="checkbox" id="isTitleBold" class="form-checkbox text-violet-500 rounded">
+                        <label for="isTitleBold" class="ml-2 mb-0">Make Title Bold</label>
+                    </div>
+                </div>
+
+                <!-- Name and Title Font Sizes -->
+                <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label for="fullNameSize">Full Name Size (px)</label>
+                        <input type="number" id="fullNameSize" value="16" min="8" max="32" class="rounded-lg">
+                    </div>
+                    <div class="input-group">
+                        <label for="titleSize">Title Size (px)</label>
+                        <input type="number" id="titleSize" value="14" min="8" max="32" class="rounded-lg">
+                    </div>
+                </div>
+
+                <!-- Name/Title Block Spacing -->
+                <div class="mb-6 input-group">
+                    <label for="nameTitleBlockSpacing">Spacing After Name/Title (px)</label>
+                    <input type="number" id="nameTitleBlockSpacing" value="10" min="0" max="50" class="rounded-lg">
+                </div>
+
+                <!-- Logo Image URL -->
+                <div class="mb-6 input-group">
+                    <label for="logoUrl">Logo Image URL (Optional)</label>
+                    <input type="url" id="logoUrl" placeholder="https://example.com/logo.png" class="rounded-lg">
+                </div>
+
+                <h2 class="section-header">Dynamic Links</h2>
+
+                <!-- Email Addresses -->
+                <div class="mb-6"> <!-- Added mb-6 for spacing -->
+                    <label class="block text-gray-300 text-sm font-bold mb-2">Email Addresses</label>
+                    <div id="emailLinksContainer" class="space-y-3 mb-3">
+                        <!-- Dynamic email inputs will be added here -->
+                    </div>
+                    <button id="addEmailBtn" class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Add Email</button>
+                </div>
+
+                <!-- Website URLs -->
+                <div class="mb-6"> <!-- Added mb-6 for spacing -->
+                    <label class="block text-gray-300 text-sm font-bold mb-2">Website URLs</label>
+                    <div id="websiteLinksContainer" class="space-y-3 mb-3">
+                        <!-- Dynamic website inputs will be added here -->
+                    </div>
+                    <button id="addWebsiteBtn" class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Add Website</button>
+                </div>
+
+                <!-- Social Media Links -->
+                <div class="mb-6"> <!-- Added mb-6 for spacing -->
+                    <label class="block text-gray-300 text-sm font-bold mb-2">Social Media Links</label>
+                    <div id="socialLinksContainer" class="space-y-3 mb-3">
+                        <!-- Dynamic social inputs will be added here -->
+                    </div>
+                    <button id="addSocialBtn" class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Add Social Link</button>
+                </div>
+
+                <h2 class="section-header">Link Styling</h2>
+
+                <!-- Email Link Styling -->
+                <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label for="emailLinkColor">Email Link Color</label>
+                        <input type="color" id="emailLinkColor" value="#007bff" class="rounded-lg">
+                    </div>
+                    <div class="input-group">
+                        <label for="emailLinkSize">Email Link Size (px)</label>
+                        <input type="number" id="emailLinkSize" value="14" min="8" max="32" class="rounded-lg">
+                    </div>
+                </div>
+
+                <!-- Website Link Styling -->
+                <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label for="websiteLinkColor">Website Link Color</label>
+                        <input type="color" id="websiteLinkColor" value="#007bff" class="rounded-lg">
+                    </div>
+                    <div class="input-group">
+                        <label for="websiteLinkSize">Website Link Size (px)</label>
+                        <input type="number" id="websiteLinkSize" value="14" min="8" max="32" class="rounded-lg">
+                    </div>
+                </div>
+
+                <!-- Spacing after Website Links -->
+                <div class="mb-4 input-group">
+                    <label for="websiteLinksSpacing">Spacing After Website Links (px)</label>
+                    <input type="number" id="websiteLinksSpacing" value="5" min="0" max="30" class="rounded-lg">
+                </div>
+
+                <!-- Social Link Styling -->
+                <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label for="socialLinkColor">Social Link Color</label>
+                        <input type="color" id="socialLinkColor" value="#007bff" class="rounded-lg">
+                    </div>
+                    <div class="input-group">
+                        <label for="socialLinkSize">Social Link Size (px)</label>
+                        <input type="number" id="socialLinkSize" value="14" min="8" max="32" class="rounded-lg">
+                    </div>
+                </div>
+
+                <!-- Spacing after Social Links -->
+                <div class="mb-4 input-group">
+                    <label for="socialLinksSpacing">Spacing After Social Links (px)</label>
+                    <input type="number" id="socialLinksSpacing" value="5" min="0" max="30" class="rounded-lg">
+                </div>
+
+                <!-- Separator Color -->
+                <div class="mb-6 input-group">
+                    <label for="separatorColor">Separator Color</label>
+                    <input type="color" id="separatorColor" value="#666666" class="rounded-lg">
+                </div>
+
+                <h2 class="section-header">Font Styling</h2>
+                <div class="mb-6 input-group">
+                    <label for="fontFamily">Font Family</label>
+                    <select id="fontFamily" class="rounded-lg">
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                        <option value="Helvetica, sans-serif">Helvetica</option>
+                        <option value="Tahoma, sans-serif">Tahoma</option>
+                        <option value="Trebuchet MS, sans-serif">Trebuchet MS</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="Times New Roman, serif">Times New Roman</option>
+                        <option value="Courier New, monospace">Courier New</option>
+                        <option value="Lucida Console, monospace">Lucida Console</option>
+                    </select>
+                </div>
+
+
+                <h2 class="section-header">Border Configuration</h2>
+
+                <!-- Border Style -->
+                <div class="mb-4 input-group">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">Border Style</label>
+                    <div class="flex flex-wrap-gap">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="borderStyle" value="left" class="form-radio text-violet-500" checked>
+                            <span class="ml-2 text-gray-300">Left Side Only</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="borderStyle" value="right" class="form-radio text-violet-500">
+                            <span class="ml-2 text-gray-300">Right Side Only</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="borderStyle" value="all" class="form-radio text-violet-500">
+                            <span class="ml-2 text-gray-300">All Sides</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="borderStyle" value="none" class="form-radio text-violet-500">
+                            <span class="ml-2 text-gray-300">No Border</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="borderStyle" value="custom" class="form-radio text-violet-500">
+                            <span class="ml-2 text-gray-300">Custom Border</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Custom Border Sides (conditionally visible) -->
+                <div id="customBorderOptions" class="mb-4 input-group hidden">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">Custom Border Sides</label>
+                    <div class="flex flex-wrap-gap">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="borderLeft" class="form-checkbox text-violet-500" checked>
+                            <span class="ml-2 text-gray-300">Left</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="borderRight" class="form-checkbox text-violet-500">
+                            <span class="ml-2 text-gray-300">Right</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="borderTop" class="form-checkbox text-violet-500">
+                            <span class="ml-2 text-gray-300">Top</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="borderBottom" class="form-checkbox text-violet-500">
+                            <span class="ml-2 text-gray-300">Bottom</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Border Color & Width -->
+                <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label for="borderColor">Border Color</label>
+                        <input type="color" id="borderColor" value="#8b5cf6" class="rounded-lg">
+                    </div>
+                    <div class="input-group">
+                        <label for="borderWidth">Border Width (px)</label>
+                        <input type="number" id="borderWidth" value="2" min="0" max="10" class="rounded-lg">
+                    </div>
+                </div>
+
+                <!-- Padding and Margin -->
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label for="signaturePadding">Padding (px)</label>
+                        <input type="number" id="signaturePadding" value="15" min="0" max="50" class="rounded-lg">
+                    </div>
+                    <div class="input-group">
+                        <label for="signatureMargin">Margin (px)</label>
+                        <input type="number" id="signatureMargin" value="0" min="0" max="50" class="rounded-lg">
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Preview & Templates -->
+            <div class="bg-white bg-opacity-10 p-6 rounded-xl shadow-lg flex flex-col">
+                <h2 class="section-header">Signature Preview</h2>
+                <iframe id="signaturePreview" class="mb-6"></iframe>
+
+                <h2 class="section-header">Copy Signature</h2>
+                <div class="flex flex-wrap-gap mb-6">
+                    <button id="copyRichTextBtn" class="btn btn-primary"><i class="fas fa-copy"></i> Copy Signature (Rich Text)</button>
+                    <button id="copyRawHtmlBtn" class="btn btn-secondary"><i class="fas fa-code"></i> Copy Raw HTML</button>
+                </div>
+
+                <h2 class="section-header">Template Management</h2>
+                <div class="mb-4 input-group">
+                    <label for="templateName">Template Name</label>
+                    <input type="text" id="templateName" placeholder="My New Signature" class="rounded-lg">
+                    <button id="saveTemplateBtn" class="btn btn-primary mt-3"><i class="fas fa-save"></i> Save Current</button>
+                </div>
+
+                <div class="mb-4 input-group">
+                    <label for="templateSelect">Load Template</label>
+                    <select id="templateSelect" class="rounded-lg">
+                        <!-- Options populated by JS -->
+                    </select>
+                    <div class="flex flex-wrap-gap mt-3">
+                        <button id="loadTemplateBtn" class="btn btn-secondary"><i class="fas fa-folder-open"></i> Load Selected</button>
+                        <button id="deleteTemplateBtn" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Delete Selected</button>
+                    </div>
+                </div>
+
+                <h2 class="section-header">Template Import/Export</h2>
+                <div class="flex flex-wrap-gap mb-4">
+                    <button id="downloadTemplatesBtn" class="btn btn-secondary"><i class="fas fa-download"></i> Download All Templates (JSON)</button>
+                    <input type="file" id="uploadTemplatesInput" accept=".json" class="hidden">
+                    <button id="uploadTemplatesBtn" class="btn btn-secondary"><i class="fas fa-upload"></i> Upload Templates (JSON)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-6 text-gray-400 text-sm">
+            <p>&copy; 2025 devsimsek. Under <a href="https://opensource.org/licenses/MIT">MIT</a> license.</p>
+        </footer>
+    </div>
+
+    <!-- Message Box for alerts -->
+    <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm w-full">
+            <p id="messageBoxContent" class="text-gray-800 text-lg mb-4"></p>
+            <button id="messageBoxCloseBtn" class="btn btn-primary">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Element References
+        const fullNameInput = document.getElementById('fullName');
+        const titleInput = document.getElementById('title');
+        const textOrderSelect = document.getElementById('textOrder');
+        const fullNameColorInput = document.getElementById('fullNameColor');
+        const titleColorInput = document.getElementById('titleColor');
+        const isFullNameBoldCheckbox = document.getElementById('isFullNameBold');
+        const isTitleBoldCheckbox = document.getElementById('isTitleBold');
+        const fullNameSizeInput = document.getElementById('fullNameSize'); // New: Full Name Size input
+        const titleSizeInput = document.getElementById('titleSize');     // New: Title Size input
+        const logoUrlInput = document.getElementById('logoUrl');
+
+        const emailLinksContainer = document.getElementById('emailLinksContainer');
+        const addEmailBtn = document.getElementById('addEmailBtn');
+        const websiteLinksContainer = document.getElementById('websiteLinksContainer');
+        const addWebsiteBtn = document.getElementById('addWebsiteBtn');
+        const socialLinksContainer = document.getElementById('socialLinksContainer');
+        const addSocialBtn = document.getElementById('addSocialBtn');
+
+        const emailLinkColorInput = document.getElementById('emailLinkColor');
+        const emailLinkSizeInput = document.getElementById('emailLinkSize');
+        const websiteLinkColorInput = document.getElementById('websiteLinkColor');
+        const websiteLinkSizeInput = document.getElementById('websiteLinkSize');
+        const socialLinkColorInput = document.getElementById('socialLinkColor');
+        const socialLinkSizeInput = document.getElementById('socialLinkSize');
+        const separatorColorInput = document.getElementById('separatorColor');
+
+        const fontFamilySelect = document.getElementById('fontFamily');
+
+        const borderStyleRadios = document.querySelectorAll('input[name="borderStyle"]');
+        const customBorderOptions = document.getElementById('customBorderOptions');
+        const borderLeftCheckbox = document.getElementById('borderLeft');
+        const borderRightCheckbox = document.getElementById('borderRight');
+        const borderTopCheckbox = document.getElementById('borderTop');
+        const borderBottomCheckbox = document.getElementById('borderBottom');
+        const borderColorInput = document.getElementById('borderColor');
+        const borderWidthInput = document.getElementById('borderWidth');
+        const signaturePaddingInput = document.getElementById('signaturePadding');
+        const signatureMarginInput = document.getElementById('signatureMargin');
+        const websiteLinksSpacingInput = document.getElementById('websiteLinksSpacing');
+        const socialLinksSpacingInput = document.getElementById('socialLinksSpacing');
+        const nameTitleBlockSpacingInput = document.getElementById('nameTitleBlockSpacing');
+
+        const signaturePreview = document.getElementById('signaturePreview');
+        const copyRichTextBtn = document.getElementById('copyRichTextBtn');
+        const copyRawHtmlBtn = document.getElementById('copyRawHtmlBtn');
+
+        const templateNameInput = document.getElementById('templateName');
+        const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+        const templateSelect = document.getElementById('templateSelect');
+        const loadTemplateBtn = document.getElementById('loadTemplateBtn');
+        const deleteTemplateBtn = document.getElementById('deleteTemplateBtn');
+
+        const downloadTemplatesBtn = document.getElementById('downloadTemplatesBtn');
+        const uploadTemplatesInput = document.getElementById('uploadTemplatesInput');
+        const uploadTemplatesBtn = document.getElementById('uploadTemplatesBtn');
+
+        const messageBox = document.getElementById('messageBox');
+        const messageBoxContent = document.getElementById('messageBoxContent');
+        const messageBoxCloseBtn = document.getElementById('messageBoxCloseBtn');
+
+        // Social media icon options (no longer used for selection, but kept for reference if needed)
+        const SOCIAL_ICONS = [
+            { name: "None", value: "" },
+            { name: "LinkedIn", value: "fab fa-linkedin" },
+            { name: "Twitter", value: "fab fa-twitter" },
+            { name: "Facebook", value: "fab fa-facebook" },
+            { name: "Instagram", value: "fab fa-instagram" },
+            { name: "YouTube", value: "fab fa-youtube" },
+            { name: "GitHub", value: "fab fa-github" },
+            { name: "Website (Globe)", value: "fas fa-globe" },
+            { name: "Email (Envelope)", value: "fas fa-envelope" }
+        ];
+
+        // Global state for templates
+        let templates = [];
+        const PREDEFINED_TEMPLATES = [
+            {
+                name: "Default Signature",
+                data: {
+                    fullName: "Your Name",
+                    title: "Your Title, Company Name",
+                    textOrder: "name-title",
+                    fullNameColor: "#333333",
+                    titleColor: "#555555",
+                    isFullNameBold: true,
+                    isTitleBold: false,
+                    fullNameSize: 16, // Added
+                    titleSize: 14,     // Added
+                    nameTitleBlockSpacing: 10,
+                    logoUrl: "https://placehold.co/100x100/8b5cf6/ffffff?text=LOGO",
+                    emails: ["your.email@example.com"],
+                    websites: ["https://yourwebsite.com"],
+                    socials: [{ platform: "LinkedIn", url: "https://linkedin.com/in/yourprofile" }],
+                    emailLinkColor: "#007bff",
+                    emailLinkSize: 14,
+                    websiteLinkColor: "#007bff",
+                    websiteLinkSize: 14,
+                    websiteLinksSpacing: 5,
+                    socialLinkColor: "#007bff",
+                    socialLinkSize: 14,
+                    socialLinksSpacing: 5,
+                    separatorColor: "#666666",
+                    fontFamily: "Arial, sans-serif",
+                    borderStyle: "left",
+                    borderLeft: true,
+                    borderRight: false,
+                    borderTop: false,
+                    borderBottom: false,
+                    borderColor: "#8b5cf6",
+                    borderWidth: 2,
+                    signaturePadding: 15,
+                    signatureMargin: 0
+                },
+                isPredefined: true
+            },
+            {
+                name: "Minimalist Signature",
+                data: {
+                    fullName: "Jane Doe",
+                    title: "Marketing Manager",
+                    textOrder: "title-name",
+                    fullNameColor: "#333333",
+                    titleColor: "#555555",
+                    isFullNameBold: false,
+                    isTitleBold: true,
+                    fullNameSize: 14, // Added
+                    titleSize: 16,     // Added
+                    nameTitleBlockSpacing: 5,
+                    logoUrl: "",
+                    emails: ["jane.doe@example.com"],
+                    websites: [],
+                    socials: [{ platform: "Twitter", url: "https://twitter.com/janedoe" }],
+                    emailLinkColor: "#333333",
+                    emailLinkSize: 12,
+                    websiteLinkColor: "#333333",
+                    websiteLinkSize: 12,
+                    websiteLinksSpacing: 3,
+                    socialLinkColor: "#333333",
+                    socialLinkSize: 12,
+                    socialLinksSpacing: 3,
+                    separatorColor: "#666666",
+                    fontFamily: "Verdana, sans-serif",
+                    borderStyle: "none",
+                    borderLeft: false,
+                    borderRight: false,
+                    borderTop: false,
+                    borderBottom: false,
+                    borderColor: "#8b5cf6",
+                    borderWidth: 2,
+                    signaturePadding: 10,
+                    signatureMargin: 5
+                },
+                isPredefined: true
+            }
+        ];
+
+        // --- Message Box Functions ---
+        function showMessageBox(message) {
+            messageBoxContent.textContent = message;
+            messageBox.classList.remove('hidden');
+        }
+
+        function hideMessageBox() {
+            messageBox.classList.add('hidden');
+        }
+
+        messageBoxCloseBtn.addEventListener('click', hideMessageBox);
+
+        // --- Helper Functions for Dynamic Fields ---
+
+        /**
+         * Creates an input field group with a remove button.
+         * @param {string} type - 'email', 'website', or 'social'.
+         * @param {string} value1 - Initial value for the main input.
+         * @param {string} value2 - Initial value for the second input (only for social).
+         * @returns {HTMLElement} The created div element containing the input(s) and button.
+         */
+        function createInputField(type, value1 = '', value2 = '') {
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2 input-group';
+
+            if (type === 'social') {
+                div.innerHTML = `
+                    <input type="text" placeholder="Platform (e.g., LinkedIn)" value="${value1}" class="flex-1 social-platform rounded-lg">
+                    <input type="url" placeholder="URL" value="${value2}" class="flex-1 social-url rounded-lg">
+                    <button type="button" class="remove-btn"><i class="fas fa-times-circle"></i></button>
+                `;
+            } else {
+                div.innerHTML = `
+                    <input type="${type === 'email' ? 'email' : 'url'}" placeholder="${type === 'email' ? 'email@example.com' : 'https://example.com'}" value="${value1}" class="flex-1 ${type}-input rounded-lg">
+                    <button type="button" class="remove-btn"><i class="fas fa-times-circle"></i></button>
+                `;
+            }
+
+            const removeBtn = div.querySelector('.remove-btn');
+            removeBtn.addEventListener('click', () => {
+                div.remove();
+                updatePreview(); // Update preview after removing an item
+            });
+
+            // Add event listener to inputs for real-time updates
+            const inputs = div.querySelectorAll('input');
+            inputs.forEach(input => input.addEventListener('input', updatePreview));
+            inputs.forEach(input => input.addEventListener('change', updatePreview));
+            return div;
+        }
+
+        /**
+         * Adds an email input field to the container.
+         * @param {string} value - Initial value for the email input.
+         */
+        function addEmailField(value = '') {
+            emailLinksContainer.appendChild(createInputField('email', value));
+            updatePreview();
+        }
+
+        /**
+         * Adds a website input field to the container.
+         * @param {string} value - Initial value for the website input.
+         */
+        function addWebsiteField(value = '') {
+            websiteLinksContainer.appendChild(createInputField('website', value));
+            updatePreview();
+        }
+
+        /**
+         * Adds a social media input field pair to the container.
+         * @param {string} platform - Initial value for the platform input.
+         * @param {string} url - Initial value for the URL input.
+         */
+        function addSocialField(platform = '', url = '') {
+            socialLinksContainer.appendChild(createInputField('social', platform, url));
+            updatePreview();
+        }
+
+        // --- Signature HTML Generation ---
+
+        /**
+         * Generates the full HTML for the email signature.
+         * @returns {string} The complete HTML string for the signature.
+         */
+        function generateSignatureHtml() {
+            const fullName = fullNameInput.value.trim();
+            const title = titleInput.value.trim();
+            const textOrder = textOrderSelect.value;
+            const fullNameColor = fullNameColorInput.value;
+            const titleColor = titleColorInput.value;
+            const isFullNameBold = isFullNameBoldCheckbox.checked;
+            const isTitleBold = isTitleBoldCheckbox.checked;
+            const fullNameSize = fullNameSizeInput.value + 'px'; // Get font size
+            const titleSize = titleSizeInput.value + 'px';     // Get font size
+            const nameTitleBlockSpacing = nameTitleBlockSpacingInput.value + 'px'; // Get spacing
+            const logoUrl = logoUrlInput.value.trim();
+
+            const emails = Array.from(emailLinksContainer.querySelectorAll('.email-input'))
+                               .map(input => input.value.trim())
+                               .filter(val => val !== '');
+            const websites = Array.from(websiteLinksContainer.querySelectorAll('.website-input'))
+                                 .map(input => input.value.trim())
+                                 .filter(val => val !== '');
+            const socials = Array.from(socialLinksContainer.querySelectorAll('.input-group'))
+                                .map(div => ({
+                                    platform: div.querySelector('.social-platform').value.trim(),
+                                    url: div.querySelector('.social-url').value.trim()
+                                }))
+                                .filter(s => s.platform !== '' && s.url !== '');
+
+            const emailLinkColor = emailLinkColorInput.value;
+            const emailLinkSize = emailLinkSizeInput.value + 'px';
+            const websiteLinkColor = websiteLinkColorInput.value;
+            const websiteLinkSize = websiteLinkSizeInput.value + 'px';
+            const websiteLinksSpacing = websiteLinksSpacingInput.value + 'px'; // Get spacing
+            const socialLinkColor = socialLinkColorInput.value;
+            const socialLinkSize = socialLinkSizeInput.value + 'px';
+            const socialLinksSpacing = socialLinksSpacingInput.value + 'px'; // Get spacing
+            const separatorColor = separatorColorInput.value;
+            const fontFamily = fontFamilySelect.value;
+
+            const borderStyle = document.querySelector('input[name="borderStyle"]:checked').value;
+            const borderColor = borderColorInput.value;
+            const borderWidth = borderWidthInput.value + 'px';
+            const signaturePadding = signaturePaddingInput.value + 'px';
+            const signatureMargin = signatureMarginInput.value + 'px';
+
+            let borderCss = '';
+            if (borderStyle === 'left') {
+                borderCss = `border-left: ${borderWidth} solid ${borderColor};`;
+            } else if (borderStyle === 'right') {
+                borderCss = `border-right: ${borderWidth} solid ${borderColor};`;
+            } else if (borderStyle === 'all') {
+                borderCss = `border: ${borderWidth} solid ${borderColor};`;
+            } else if (borderStyle === 'custom') {
+                if (borderLeftCheckbox.checked) borderCss += `border-left: ${borderWidth} solid ${borderColor};`;
+                if (borderRightCheckbox.checked) borderCss += `border-right: ${borderWidth} solid ${borderColor};`;
+                if (borderTopCheckbox.checked) borderCss += `border-top: ${borderWidth} solid ${borderColor};`;
+                if (borderBottomCheckbox.checked) borderCss += `border-bottom: ${borderWidth} solid ${borderColor};`;
+            }
+
+            // Default placeholder image for logo fallback
+            const placeholderLogo = `https://placehold.co/100x100/8b5cf6/ffffff?text=LOGO`;
+
+            // Construct name and title HTML based on textOrder, colors, bold, and size status
+            let nameAndTitleHtml = '';
+            const nameHtml = `<span style="color: ${fullNameColor}; font-weight: ${isFullNameBold ? 'bold' : 'normal'}; font-size: ${fullNameSize};">${fullName}</span>`;
+            const titleHtml = `<span style="color: ${titleColor}; font-weight: ${isTitleBold ? 'bold' : 'normal'}; font-size: ${titleSize};">${title}</span>`;
+
+            if (textOrder === 'name-title') {
+                nameAndTitleHtml = `${nameHtml}<br>${titleHtml}`;
+            } else { // title-name
+                nameAndTitleHtml = `${titleHtml}<br>${nameHtml}`;
+            }
+
+            // Apply margin-bottom to the name/title block container
+            const nameTitleBlock = `<div style="margin-bottom: ${nameTitleBlockSpacing};">${nameAndTitleHtml}</div>`;
+
+
+            const emailLinksHtml = emails.map(email => `
+                <a href="mailto:${email}" class="signature-link email-link" style="display: block; text-decoration: none; margin-bottom: 2px; color: ${emailLinkColor}; font-size: ${emailLinkSize};">${email}</a>
+            `).join('');
+
+            // Apply margin-bottom to the website links container
+            const websiteLinksContainerHtml = websites.length > 0 ? `
+                <div style="margin-bottom: ${websiteLinksSpacing};">
+                    ${websites.map(website => `
+                        <a href="${website}" target="_blank" class="signature-link website-link" style="display: block; text-decoration: none; margin-bottom: 2px; color: ${websiteLinkColor}; font-size: ${websiteLinkSize};">${website.replace("http://", "").replace("https://", "")}</a>
+                    `).join('')}
+                </div>
+            ` : '';
+
+            // Apply margin-bottom to the social links container
+            const socialLinksHtml = socials.length > 0 ? `
+                <div style="margin-bottom: ${socialLinksSpacing};">
+                    ${socials.map(social => `
+                        <a href="${social.url}" target="_blank" class="signature-link social-link" style="display: inline-block; text-decoration: none; color: ${socialLinkColor}; font-size: ${socialLinkSize};">
+                            ${social.platform}
+                        </a>
+                    `).join(socials.length > 1 ? `<span style="color: ${separatorColor};"> | </span>` : '')}
+                </div>
+            ` : '';
+
+
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: ${fontFamily}; margin: 0; padding: 0; }
+                        /* Base styles for email compatibility - will be overridden by inline */
+                        .signature-logo img {
+                            max-width: 150px;
+                            height: auto;
+                            display: block;
+                        }
+                    </style>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+                </head>
+                <body>
+                    <!-- Outer table for border, padding, and margin -->
+                    <table border="0" cellpadding="0" cellspacing="0" style="width: auto; ${borderCss} margin: ${signatureMargin};">
+                        <tr>
+                            <td style="padding: ${signaturePadding};">
+                                <!-- Inner container for signature content -->
+                                <table border="0" cellpadding="0" cellspacing="0" style="width: 100%; line-height: 1.4; color: #333333;">
+                                    <tr>
+                                        <td>
+                                            ${logoUrl ? `<div class="signature-logo" style="margin-bottom: 10px;">
+                                                <img src="${logoUrl}" alt="Company Logo" onerror="this.onerror=null;this.src='${placeholderLogo}';" />
+                                            </div>` : ''}
+                                            ${nameTitleBlock}
+
+                                            ${emails.length > 0 ? emailLinksHtml : ''}
+
+                                            ${websiteLinksContainerHtml}
+
+                                            ${socialLinksHtml}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+            `;
+        }
+
+        /**
+         * Updates the content of the iframe with the generated signature HTML.
+         */
+        function updatePreview() {
+            const signatureHtml = generateSignatureHtml();
+            signaturePreview.srcdoc = signatureHtml;
+        }
+
+        // --- Copy Functionality ---
+
+        /**
+         * Copies the rich text (formatted HTML) of the signature to the clipboard.
+         * This method creates a temporary hidden element in the main document to perform the copy,
+         * which often provides better compatibility for preserving styles.
+         */
+        async function copyRichText() {
+            const signatureHtml = generateSignatureHtml();
+            try {
+                // Create a temporary div to hold the HTML content
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.left = '-9999px'; // Move off-screen
+                tempDiv.style.opacity = '0';
+                tempDiv.innerHTML = signatureHtml; // Set the full generated HTML
+
+                document.body.appendChild(tempDiv);
+
+                // Select the content of the temporary div
+                const range = document.createRange();
+                range.selectNodeContents(tempDiv);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+                // Execute copy command
+                const success = document.execCommand('copy');
+
+                // Clean up
+                selection.removeAllRanges();
+                document.body.removeChild(tempDiv);
+
+                if (success) {
+                    showMessageBox('Signature (Rich Text) copied to clipboard!');
+                } else {
+                    showMessageBox('Failed to copy rich text. Please try copying raw HTML.');
+                }
+            } catch (err) {
+                console.error('Failed to copy rich text:', err);
+                showMessageBox('Error copying rich text. Your browser might not support this method or it failed.');
+            }
+        }
+
+        /**
+         * Copies the raw HTML of the signature to the clipboard.
+         */
+        async function copyRawHtml() {
+            const rawHtml = generateSignatureHtml();
+            try {
+                // Use document.execCommand('copy') for broader compatibility in iframes
+                const textarea = document.createElement('textarea');
+                textarea.value = rawHtml;
+                textarea.style.position = 'fixed'; // Avoid scrolling to bottom
+                textarea.style.opacity = '0'; // Hide it
+                document.body.appendChild(textarea);
+                textarea.select();
+                const success = document.execCommand('copy');
+                document.body.removeChild(textarea);
+
+                if (success) {
+                    showMessageBox('Raw HTML copied to clipboard!');
+                } else {
+                    showMessageBox('Failed to copy raw HTML. Please try manually selecting from the preview.');
+                }
+            } catch (err) {
+                console.error('Failed to copy raw HTML:', err);
+                showMessageBox('Error copying raw HTML. Your browser might not support this method or it failed.');
+            }
+        }
+
+
+        // --- Template Management ---
+
+        /**
+         * Saves the current signature configuration as a template to local storage.
+         */
+        function saveTemplate() {
+            const templateName = templateNameInput.value.trim();
+            if (!templateName) {
+                showMessageBox('Please enter a name for your template.');
+                return;
+            }
+
+            const currentConfig = {
+                fullName: fullNameInput.value,
+                title: titleInput.value,
+                textOrder: textOrderSelect.value,
+                fullNameColor: fullNameColorInput.value,
+                titleColor: titleColorInput.value,
+                isFullNameBold: isFullNameBoldCheckbox.checked,
+                isTitleBold: isTitleBoldCheckbox.checked,
+                fullNameSize: parseInt(fullNameSizeInput.value), // Save
+                titleSize: parseInt(titleSizeInput.value),     // Save
+                nameTitleBlockSpacing: parseInt(nameTitleBlockSpacingInput.value), // Save
+                logoUrl: logoUrlInput.value,
+                emails: Array.from(emailLinksContainer.querySelectorAll('.email-input')).map(input => input.value),
+                websites: Array.from(websiteLinksContainer.querySelectorAll('.website-input')).map(input => input.value),
+                socials: Array.from(socialLinksContainer.querySelectorAll('.input-group')).map(div => ({
+                    platform: div.querySelector('.social-platform').value,
+                    url: div.querySelector('.social-url').value
+                })),
+                emailLinkColor: emailLinkColorInput.value,
+                emailLinkSize: parseInt(emailLinkSizeInput.value),
+                websiteLinkColor: websiteLinkColorInput.value,
+                websiteLinkSize: parseInt(websiteLinkSizeInput.value),
+                websiteLinksSpacing: parseInt(websiteLinksSpacingInput.value), // Save
+                socialLinkColor: socialLinkColorInput.value,
+                socialLinkSize: parseInt(socialLinkSizeInput.value),
+                socialLinksSpacing: parseInt(socialLinksSpacingInput.value), // Save
+                separatorColor: separatorColorInput.value,
+                fontFamily: fontFamilySelect.value,
+                borderStyle: document.querySelector('input[name="borderStyle"]:checked').value,
+                borderLeft: borderLeftCheckbox.checked,
+                borderRight: borderRightCheckbox.checked,
+                borderTop: borderTopCheckbox.checked,
+                borderBottom: borderBottomCheckbox.checked,
+                borderColor: borderColorInput.value,
+                borderWidth: parseInt(borderWidthInput.value),
+                signaturePadding: parseInt(signaturePaddingInput.value),
+                signatureMargin: parseInt(signatureMarginInput.value)
+            };
+
+            // Check if a template with this name already exists and update it
+            const existingIndex = templates.findIndex(t => t.name === templateName && !t.isPredefined);
+            if (existingIndex > -1) {
+                templates[existingIndex].data = currentConfig;
+                showMessageBox(`Template "${templateName}" updated successfully!`);
+            } else {
+                templates.push({ name: templateName, data: currentConfig, isPredefined: false });
+                showMessageBox(`Template "${templateName}" saved successfully!`);
+            }
+
+            saveTemplatesToLocalStorage();
+            populateTemplateSelect();
+            templateNameInput.value = ''; // Clear input after saving
+        }
+
+        /**
+         * Loads templates from local storage and populates the dropdown.
+         */
+        function loadTemplates() {
+            try {
+                const storedTemplates = localStorage.getItem('signEditTemplates');
+                if (storedTemplates) {
+                    templates = JSON.parse(storedTemplates);
+                } else {
+                    templates = [];
+                }
+                // Add predefined templates, ensuring no duplicates by name
+                PREDEFINED_TEMPLATES.forEach(predef => {
+                    if (!templates.some(t => t.name === predef.name)) {
+                        templates.unshift(predef); // Add to the beginning
+                    }
+                });
+                populateTemplateSelect();
+            } catch (e) {
+                console.error("Error loading templates from local storage:", e);
+                showMessageBox("Error loading templates. Local storage might be corrupted.");
+                templates = PREDEFINED_TEMPLATES; // Reset to predefined if error
+                populateTemplateSelect();
+            }
+        }
+
+        /**
+         * Populates the template selection dropdown.
+         */
+        function populateTemplateSelect() {
+            templateSelect.innerHTML = ''; // Clear existing options
+
+            if (templates.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No templates available';
+                templateSelect.appendChild(option);
+                loadTemplateBtn.disabled = true;
+                deleteTemplateBtn.disabled = true;
+                return;
+            }
+
+            templates.forEach((template, index) => {
+                const option = document.createElement('option');
+                option.value = index; // Use index as value for easy lookup
+                option.textContent = template.name + (template.isPredefined ? ' (Predefined)' : '');
+                templateSelect.appendChild(option);
+            });
+
+            // Select the first option by default, or previously selected if available
+            if (templateSelect.options.length > 0) {
+                templateSelect.selectedIndex = 0;
+                loadTemplateBtn.disabled = false;
+                deleteTemplateBtn.disabled = templates[templateSelect.selectedIndex].isPredefined;
+            } else {
+                loadTemplateBtn.disabled = true;
+                deleteTemplateBtn.disabled = true;
+            }
+        }
+
+        /**
+         * Saves the current `templates` array to local storage.
+         */
+        function saveTemplatesToLocalStorage() {
+            // Filter out predefined templates before saving to local storage
+            const userTemplates = templates.filter(t => !t.isPredefined);
+            localStorage.setItem('signEditTemplates', JSON.stringify(userTemplates));
+        }
+
+        /**
+         * Loads the selected template's data into the input fields.
+         */
+        function loadSelectedTemplate() {
+            const selectedIndex = templateSelect.value;
+            console.log('Attempting to load template at index:', selectedIndex); // Debug log
+            if (selectedIndex === '' || isNaN(selectedIndex)) {
+                showMessageBox('Please select a template to load.');
+                return;
+            }
+
+            const template = templates[parseInt(selectedIndex)];
+            if (!template) {
+                showMessageBox('Selected template not found.');
+                console.error('Template not found for index:', selectedIndex); // Debug log
+                return;
+            }
+
+            const data = template.data;
+            console.log('Loaded template data:', data); // Debug log to inspect the data object
+
+            fullNameInput.value = data.fullName || '';
+            titleInput.value = data.title || '';
+            textOrderSelect.value = data.textOrder || 'name-title';
+            fullNameColorInput.value = data.fullNameColor || '#333333';
+            titleColorInput.value = data.titleColor || '#555555';
+            isFullNameBoldCheckbox.checked = data.isFullNameBold || false;
+            isTitleBoldCheckbox.checked = data.isTitleBold || false;
+            fullNameSizeInput.value = data.fullNameSize || 16; // Load
+            titleSizeInput.value = data.titleSize || 14;     // Load
+            nameTitleBlockSpacingInput.value = data.nameTitleBlockSpacing || 10; // Load
+            logoUrlInput.value = data.logoUrl || '';
+
+            // Clear existing dynamic fields
+            emailLinksContainer.innerHTML = '';
+            websiteLinksContainer.innerHTML = '';
+            socialLinksContainer.innerHTML = '';
+
+            // Populate dynamic fields, ensuring string conversion for safety
+            (data.emails || []).forEach(email => addEmailField(String(email || '')));
+            (data.websites || []).forEach(website => addWebsiteField(String(website || '')));
+            (data.socials || []).forEach(social => addSocialField(String(social.platform || ''), String(social.url || '')));
+
+            emailLinkColorInput.value = data.emailLinkColor || '#007bff';
+            emailLinkSizeInput.value = data.emailLinkSize || 14;
+            websiteLinkColorInput.value = data.websiteLinkColor || '#007bff';
+            websiteLinkSizeInput.value = data.websiteLinkSize || 14;
+            websiteLinksSpacingInput.value = data.websiteLinksSpacing || 5; // Load
+            socialLinkColorInput.value = data.socialLinkColor || '#007bff';
+            socialLinkSizeInput.value = data.socialLinkSize || 14;
+            socialLinksSpacingInput.value = data.socialLinksSpacing || 5; // Load
+            separatorColorInput.value = data.separatorColor || '#666666';
+            fontFamilySelect.value = data.fontFamily || 'Arial, sans-serif';
+
+            // Set border style radio
+            const selectedBorderStyleRadio = document.querySelector(`input[name="borderStyle"][value="${data.borderStyle || 'left'}"`);
+            if (selectedBorderStyleRadio) {
+                selectedBorderStyleRadio.checked = true;
+                // Manually trigger change to update custom border options visibility
+                selectedBorderStyleRadio.dispatchEvent(new Event('change'));
+            }
+
+            // Set custom border checkboxes
+            borderLeftCheckbox.checked = data.borderLeft || false;
+            borderRightCheckbox.checked = data.borderRight || false;
+            borderTopCheckbox.checked = data.borderTop || false;
+            borderBottomCheckbox.checked = data.borderBottom || false;
+
+            borderColorInput.value = data.borderColor || '#8b5cf6';
+            borderWidthInput.value = data.borderWidth || 2;
+            signaturePaddingInput.value = data.signaturePadding || 15;
+            signatureMarginInput.value = data.signatureMargin || 0;
+
+            updatePreview();
+            showMessageBox(`Template "${template.name}" loaded successfully!`);
+            console.log('Template loaded and preview updated.'); // Debug log
+        }
+
+        /**
+         * Deletes the selected template from local storage.
+         */
+        function deleteSelectedTemplate() {
+            const selectedIndex = templateSelect.value;
+            if (selectedIndex === '' || isNaN(selectedIndex)) {
+                showMessageBox('Please select a template to delete.');
+                return;
+            }
+
+            const templateToDelete = templates[parseInt(selectedIndex)];
+            if (templateToDelete && templateToDelete.isPredefined) {
+                showMessageBox('Pre-defined templates cannot be deleted.');
+                return;
+            }
+
+            if (confirm(`Are you sure you want to delete template "${templateToDelete.name}"?`)) {
+                templates.splice(parseInt(selectedIndex), 1);
+                saveTemplatesToLocalStorage();
+                populateTemplateSelect();
+                updatePreview(); // Update preview in case the deleted template was active
+                showMessageBox('Template deleted successfully!');
+            }
+        }
+
+        // --- Template Import/Export ---
+
+        /**
+         * Downloads all current templates as a JSON file.
+         */
+        function downloadTemplates() {
+            const userTemplates = templates.filter(t => !t.isPredefined); // Only export user-saved templates
+            const dataStr = JSON.stringify(userTemplates, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'signedit_templates.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showMessageBox('Templates downloaded successfully!');
+        }
+
+        /**
+         * Handles uploading templates from a JSON file.
+         * @param {Event} event - The change event from the file input.
+         */
+        function uploadTemplates(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const uploadedData = JSON.parse(e.target.result);
+                    if (!Array.isArray(uploadedData)) {
+                        throw new Error("Invalid JSON format. Expected an array of templates.");
+                    }
+
+                    // Merge uploaded templates, prioritizing uploaded ones if names conflict
+                    uploadedData.forEach(uploadedTemplate => {
+                        const existingIndex = templates.findIndex(t => t.name === uploadedTemplate.name && !t.isPredefined);
+                        if (existingIndex > -1) {
+                            templates[existingIndex] = { ...uploadedTemplate, isPredefined: false }; // Update existing
+                        } else {
+                            templates.push({ ...uploadedTemplate, isPredefined: false }); // Add new
+                        }
+                    });
+
+                    saveTemplatesToLocalStorage();
+                    populateTemplateSelect();
+                    showMessageBox('Templates uploaded and merged successfully!');
+                } catch (error) {
+                    console.error("Error parsing uploaded templates:", error);
+                    showMessageBox(`Error uploading templates: ${error.message || 'Invalid JSON file.'}`);
+                }
+                uploadTemplatesInput.value = ''; // Clear file input
+            };
+            reader.onerror = () => {
+                showMessageBox('Error reading file.');
+                uploadTemplatesInput.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        // --- Event Listeners ---
+
+        // Main input fields for real-time preview updates
+        [fullNameInput, titleInput, logoUrlInput, textOrderSelect,
+         fullNameColorInput, titleColorInput,
+         isFullNameBoldCheckbox, isTitleBoldCheckbox,
+         fullNameSizeInput, titleSizeInput, // Add new size inputs to listeners
+         emailLinkColorInput, emailLinkSizeInput,
+         websiteLinkColorInput, websiteLinkSizeInput,
+         socialLinkColorInput, socialLinkSizeInput,
+         separatorColorInput,
+         fontFamilySelect,
+         borderColorInput, borderWidthInput,
+         signaturePaddingInput, signatureMarginInput,
+         websiteLinksSpacingInput, socialLinksSpacingInput, nameTitleBlockSpacingInput
+        ].forEach(input => {
+            input.addEventListener('input', updatePreview);
+            input.addEventListener('change', updatePreview);
+        });
+
+        // Dynamic link add buttons
+        addEmailBtn.addEventListener('click', () => addEmailField());
+        addWebsiteBtn.addEventListener('click', () => addWebsiteField());
+        addSocialBtn.addEventListener('click', () => addSocialField());
+
+        // Border style radio buttons
+        borderStyleRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (radio.value === 'custom') {
+                    customBorderOptions.classList.remove('hidden');
+                } else {
+                    customBorderOptions.classList.add('hidden');
+                }
+                updatePreview();
+            });
+        });
+
+        // Custom border checkboxes
+        [borderLeftCheckbox, borderRightCheckbox, borderTopCheckbox, borderBottomCheckbox].forEach(checkbox => {
+            checkbox.addEventListener('change', updatePreview);
+        });
+
+        // Copy buttons
+        copyRichTextBtn.addEventListener('click', copyRichText);
+        copyRawHtmlBtn.addEventListener('click', copyRawHtml);
+
+        // Template management buttons
+        saveTemplateBtn.addEventListener('click', saveTemplate);
+        loadTemplateBtn.addEventListener('click', loadSelectedTemplate);
+        deleteTemplateBtn.addEventListener('click', deleteSelectedTemplate);
+        templateSelect.addEventListener('change', () => {
+            const selectedTemplate = templates[templateSelect.selectedIndex];
+            deleteTemplateBtn.disabled = selectedTemplate ? selectedTemplate.isPredefined : true;
+        });
+
+
+        // Template Import/Export
+        downloadTemplatesBtn.addEventListener('click', downloadTemplates);
+        uploadTemplatesBtn.addEventListener('click', () => uploadTemplatesInput.click());
+        uploadTemplatesInput.addEventListener('change', uploadTemplates);
+
+        // --- Initial Setup ---
+        window.onload = () => {
+            loadTemplates();
+            const initialBorderStyle = document.querySelector('input[name="borderStyle"]:checked').value;
+            if (initialBorderStyle === 'custom') {
+                customBorderOptions.classList.remove('hidden');
+                borderLeftCheckbox.checked = templates[templateSelect.selectedIndex]?.data?.borderLeft || false;
+                borderRightCheckbox.checked = templates[templateSelect.selectedIndex]?.data?.borderRight || false;
+                borderTopCheckbox.checked = templates[templateSelect.selectedIndex]?.data?.borderTop || false;
+                borderBottomCheckbox.checked = templates[templateSelect.selectedIndex]?.data?.borderBottom || false;
+            } else {
+                customBorderOptions.classList.add('hidden');
+            }
+            addEmailField('');
+            addWebsiteField('');
+            addSocialField('', '');
+            updatePreview();
+        };
+
+        // Override default confirm to use custom message box
+        window.confirm = (message) => {
+            return new Promise((resolve) => {
+                messageBoxContent.textContent = message;
+                messageBox.classList.remove('hidden');
+
+                const okBtn = document.createElement('button');
+                okBtn.textContent = 'Yes';
+                okBtn.className = 'btn btn-primary mr-2';
+                const cancelBtn = document.createElement('button');
+                cancelBtn.textContent = 'No';
+                cancelBtn.className = 'btn btn-secondary';
+
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'flex justify-center gap-4 mt-4';
+                buttonContainer.appendChild(okBtn);
+                buttonContainer.appendChild(cancelBtn);
+
+                messageBox.querySelector('.bg-white').appendChild(buttonContainer);
+
+                okBtn.onclick = () => {
+                    messageBox.classList.add('hidden');
+                    buttonContainer.remove();
+                    resolve(true);
+                };
+                cancelBtn.onclick = () => {
+                    messageBox.classList.add('hidden');
+                    buttonContainer.remove();
+                    resolve(false);
+                };
+            });
+        };
+    </script>
+</body>
+</html>
